@@ -1,0 +1,47 @@
+{
+  "name": "xml-cli",
+  "version": "0.1.0",
+  "description": "A pipe-friendly CLI for exploring and querying XML files",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "xml-cli": "dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "files": [
+    "dist",
+    "skills"
+  ],
+  "keywords": [
+    "xml",
+    "cli",
+    "xpath",
+    "query"
+  ],
+  "author": "pvasek",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pvasek/xml-cli.git"
+  },
+  "homepage": "https://github.com/pvasek/xml-cli#readme",
+  "bugs": {
+    "url": "https://github.com/pvasek/xml-cli/issues"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@xmldom/xmldom": "^0.8.11",
+    "commander": "^14.0.3",
+    "fast-xml-parser": "^5.3.5",
+    "xpath": "^0.0.34"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  }
+}
