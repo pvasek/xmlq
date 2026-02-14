@@ -1,6 +1,6 @@
 {
-  "name": "xmlq",
-  "version": "0.1.0",
+  "name": "@pvasek/xmlq",
+  "version": "0.0.1",
   "description": "A pipe-friendly CLI for exploring and querying XML files",
   "type": "module",
   "main": "dist/index.js",
@@ -11,7 +11,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "files": [
     "dist",
@@ -31,6 +32,9 @@
   "homepage": "https://github.com/pvasek/xmlq#readme",
   "bugs": {
     "url": "https://github.com/pvasek/xmlq/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT",
   "dependencies": {

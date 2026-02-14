@@ -359,7 +359,7 @@ xmlq can be used by AI coding agents like Claude Code. The `skill --install` com
 
 ```bash
 # 1. Install xmlq globally
-npm install -g xmlq
+npm install -g @pvasek/xmlq
 
 # 2. In your project directory, install the skill
 xmlq skill --install
@@ -410,7 +410,7 @@ find . -name '*.xml' -exec xmlq validate {} \;
 - **Parser**: DOM-based (e.g. `fast-xml-parser`) for v1. Design command interfaces so a streaming/SAX backend can be swapped in later for large files.
 - **XPath**: Use `xpath` or `fontoxpath` for XPath 1.0/2.0 support. XPath is the standard XML query language — no need to invent a custom one.
 - **Output**: Colored + human-friendly when stdout is a TTY, plain text when piped. `--json` flag always produces machine-readable output.
-- **Packaging**: Publish to npm (`npx xmlq`), optionally bundle with `pkg` or `bun build --compile` for a standalone binary.
+- **Packaging**: Publish to npm (`npx @pvasek/xmlq`), optionally bundle with `pkg` or `bun build --compile` for a standalone binary.
 
 ### Exploration workflow
 

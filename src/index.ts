@@ -22,7 +22,7 @@ const program = new Command();
 program
   .name("xmlq")
   .description("A pipe-friendly CLI for exploring and querying XML files")
-  .version("0.1.0")
+  .version("0.0.1")
   .option("--no-color", "Disable colored output")
   .option("--ns <mapping>", "Register namespace prefix for XPath (PREFIX=URI)");
 

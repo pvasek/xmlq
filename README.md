@@ -1,22 +1,22 @@
 # xmlq
 
-[![npm version](https://img.shields.io/npm/v/xmlq.svg)](https://www.npmjs.com/package/xmlq)
+[![npm version](https://img.shields.io/npm/v/@pvasek/xmlq.svg)](https://www.npmjs.com/package/@pvasek/xmlq)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
 
 A pipe-friendly CLI for exploring and querying XML files. Built with Node.js/TypeScript.
 
-Published on npm as [`xmlq`](https://www.npmjs.com/package/xmlq).
+Published on npm as [`@pvasek/xmlq`](https://www.npmjs.com/package/@pvasek/xmlq).
 
 ## Installation
 
 ```bash
-npm install -g xmlq
+npm install -g @pvasek/xmlq
 ```
 
 Or run directly with npx:
 
 ```bash
-npx xmlq <command> [options] [file]
+npx @pvasek/xmlq <command> [options] [file]
 ```
 
 ## Usage
@@ -93,7 +93,7 @@ xmlq works with [Claude Code](https://claude.ai/code) — install the skill so C
 
 ```bash
 # 1. Install xmlq globally
-npm install -g xmlq
+npm install -g @pvasek/xmlq
 
 # 2. In your project, install the skill
 xmlq skill --install
