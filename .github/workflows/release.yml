@@ -15,7 +15,7 @@ on:
         description: "Publish to npm after release"
         required: false
         type: boolean
-        default: false
+        default: true
 
 jobs:
   release:
