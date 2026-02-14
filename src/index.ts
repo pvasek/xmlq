@@ -20,7 +20,7 @@ import { register as skill } from "./commands/skill.js";
 const program = new Command();
 
 program
-  .name("xml-cli")
+  .name("xmlq")
   .description("A pipe-friendly CLI for exploring and querying XML files")
   .version("0.1.0")
   .option("--no-color", "Disable colored output")

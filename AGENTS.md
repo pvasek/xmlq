@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-xml-cli is a pipe-friendly CLI for exploring and querying XML files, built with TypeScript/Node.js. It uses Commander.js for CLI argument parsing. Currently v0.1.0 — all 13 commands are scaffolded but their implementations are stubbed (TODO).
+xmlq is a pipe-friendly CLI for exploring and querying XML files, built with TypeScript/Node.js. It uses Commander.js for CLI argument parsing. Currently v0.1.0 — all 13 commands are scaffolded but their implementations are stubbed (TODO).
 
 The full specification lives in **SPEC.md** — always consult it when implementing commands.
 

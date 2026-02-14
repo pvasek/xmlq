@@ -1,11 +1,11 @@
 {
-  "name": "xml-cli",
+  "name": "xmlq",
   "version": "0.1.0",
   "description": "A pipe-friendly CLI for exploring and querying XML files",
   "type": "module",
   "main": "dist/index.js",
   "bin": {
-    "xml-cli": "dist/index.js"
+    "xmlq": "dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -26,11 +26,11 @@
   "author": "pvasek",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/pvasek/xml-cli.git"
+    "url": "git+https://github.com/pvasek/xmlq.git"
   },
-  "homepage": "https://github.com/pvasek/xml-cli#readme",
+  "homepage": "https://github.com/pvasek/xmlq#readme",
   "bugs": {
-    "url": "https://github.com/pvasek/xml-cli/issues"
+    "url": "https://github.com/pvasek/xmlq/issues"
   },
   "license": "MIT",
   "dependencies": {

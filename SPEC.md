@@ -1,11 +1,11 @@
-# xml-cli — Spec
+# xmlq — Spec
 
 A pipe-friendly CLI for exploring and querying XML files. Built with Node.js/TypeScript.
 
-Binary name: **`xml-cli`**
+Binary name: **`xmlq`**
 
 ```
-xml-cli <command> [options] [file]
+xmlq <command> [options] [file]
 ```
 
 All commands accept a file path or read from **stdin** when no file is given.
@@ -15,12 +15,12 @@ All output goes to **stdout** (machine-readable by default), errors/warnings to 
 
 ## Commands
 
-### `xml-cli stat`
+### `xmlq stat`
 
 Quick overview of an XML file — the first thing you run on an unfamiliar file.
 
 ```
-xml-cli stat data.xml
+xmlq stat data.xml
 ```
 
 ```
@@ -38,12 +38,12 @@ Top-level:  <product> x 1200, <category> x 45, <metadata> x 1
 
 ---
 
-### `xml-cli tags`
+### `xmlq tags`
 
 List all unique element names with occurrence counts. Essential for understanding what a file contains.
 
 ```
-xml-cli tags data.xml
+xmlq tags data.xml
 ```
 
 ```
@@ -65,12 +65,12 @@ xml-cli tags data.xml
 
 ---
 
-### `xml-cli tree`
+### `xmlq tree`
 
 Show the **structural skeleton** of the document — unique element hierarchy, not every node. Critical for understanding nesting without drowning in output.
 
 ```
-xml-cli tree data.xml
+xmlq tree data.xml
 ```
 
 ```
@@ -103,12 +103,12 @@ Shows attributes as `@attr`, text content as `#text` (only when element has both
 
 ---
 
-### `xml-cli select`
+### `xmlq select`
 
 Query nodes using **XPath** expressions. The core workhorse command.
 
 ```
-xml-cli select '//product[price > 100]' data.xml
+xmlq select '//product[price > 100]' data.xml
 ```
 
 Outputs matching XML fragments, one per match:
@@ -135,51 +135,51 @@ Outputs matching XML fragments, one per match:
 
 ```bash
 # These are equivalent:
-xml-cli select '//product' --first 1 data.xml
-xml-cli first '//product' data.xml
+xmlq select '//product' --first 1 data.xml
+xmlq first '//product' data.xml
 
 # These are equivalent:
-xml-cli select '//product' --count data.xml
-xml-cli count '//product' data.xml
+xmlq select '//product' --count data.xml
+xmlq count '//product' data.xml
 
 # These are equivalent:
-xml-cli select '//product/name' --text data.xml
-xml-cli text '//product/name' data.xml
+xmlq select '//product/name' --text data.xml
+xmlq text '//product/name' data.xml
 ```
 
 ---
 
-### `xml-cli first`
+### `xmlq first`
 
 Shorthand: select first N matching nodes. The most used command when exploring — you almost never want all 1200 products dumped to your terminal.
 
 ```
-xml-cli first '//product' data.xml          # first 1 match
-xml-cli first 5 '//product' data.xml        # first 5 matches
+xmlq first '//product' data.xml          # first 1 match
+xmlq first 5 '//product' data.xml        # first 5 matches
 ```
 
 ---
 
-### `xml-cli count`
+### `xmlq count`
 
 Count matches for an XPath expression.
 
 ```
-xml-cli count '//product' data.xml
+xmlq count '//product' data.xml
 # 1200
 
-xml-cli count '//product[price > 100]' data.xml
+xmlq count '//product[price > 100]' data.xml
 # 342
 ```
 
 ---
 
-### `xml-cli text`
+### `xmlq text`
 
 Extract text content of matched nodes, one value per line.
 
 ```
-xml-cli text '//product/name' data.xml
+xmlq text '//product/name' data.xml
 ```
 
 ```
@@ -197,18 +197,18 @@ Gadget X
 
 ---
 
-### `xml-cli attrs`
+### `xmlq attrs`
 
 List attributes of matched elements. Useful for discovering the data model.
 
 ```
-xml-cli attrs '//product' data.xml
+xmlq attrs '//product' data.xml
 ```
 
 When used without XPath, discovers all attribute names across the entire document:
 
 ```
-xml-cli attrs data.xml
+xmlq attrs data.xml
 ```
 
 ```
@@ -226,14 +226,14 @@ Small-cardinality attributes (<=10 unique values) show all distinct values inlin
 
 ---
 
-### `xml-cli fmt`
+### `xmlq fmt`
 
 Pretty-print / reformat XML.
 
 ```
-xml-cli fmt data.xml                   # pretty-print to stdout
-xml-cli fmt --indent 4 data.xml       # custom indent
-xml-cli fmt --compact data.xml        # minify
+xmlq fmt data.xml                   # pretty-print to stdout
+xmlq fmt --indent 4 data.xml       # custom indent
+xmlq fmt --compact data.xml        # minify
 ```
 
 | Flag | Description |
@@ -244,13 +244,13 @@ xml-cli fmt --compact data.xml        # minify
 
 ---
 
-### `xml-cli json`
+### `xmlq json`
 
 Convert XML to JSON. Pipe to `jq` for further processing.
 
 ```
-xml-cli json data.xml | jq '.catalog.product[0]'
-xml-cli select '//product' --first 5 data.xml | xml-cli json
+xmlq json data.xml | jq '.catalog.product[0]'
+xmlq select '//product' --first 5 data.xml | xmlq json
 ```
 
 | Flag | Description |
@@ -259,15 +259,15 @@ xml-cli select '//product' --first 5 data.xml | xml-cli json
 
 ---
 
-### `xml-cli validate`
+### `xmlq validate`
 
 Check if the file is well-formed XML.
 
 ```
-xml-cli validate data.xml
+xmlq validate data.xml
 # OK: well-formed XML
 
-xml-cli validate broken.xml
+xmlq validate broken.xml
 # ERROR: line 42, col 15: unexpected closing tag </item>
 ```
 
@@ -275,12 +275,12 @@ Exit code: `0` for valid, `1` for errors.
 
 ---
 
-### `xml-cli ns`
+### `xmlq ns`
 
 List namespaces used in the document.
 
 ```
-xml-cli ns data.xml
+xmlq ns data.xml
 ```
 
 ```
@@ -291,12 +291,12 @@ xsi       http://www.w3.org/2001/XMLSchema-instance
 
 ---
 
-### `xml-cli schema`
+### `xmlq schema`
 
 Infer a rough schema from the document — shows which elements appear where, their attributes, whether they contain text or children, and optionally value types.
 
 ```
-xml-cli schema data.xml
+xmlq schema data.xml
 ```
 
 ```yaml
@@ -333,19 +333,19 @@ catalog:
 
 ---
 
-### `xml-cli skill`
+### `xmlq skill`
 
-Install the xml-cli skill for Claude Code AI agent integration.
+Install the xmlq skill for Claude Code AI agent integration.
 
 ```
-xml-cli skill --install
+xmlq skill --install
 ```
 
-Creates `.claude/skills/xml-cli/SKILL.md` in the current directory. This file teaches Claude Code how to use xml-cli commands — Claude discovers it automatically and can then use xml-cli to explore XML files on the user's behalf.
+Creates `.claude/skills/xmlq/SKILL.md` in the current directory. This file teaches Claude Code how to use xmlq commands — Claude discovers it automatically and can then use xmlq to explore XML files on the user's behalf.
 
 | Flag | Description |
 |------|-------------|
-| `--install` | Deploy SKILL.md to `.claude/skills/xml-cli/` in current directory |
+| `--install` | Deploy SKILL.md to `.claude/skills/xmlq/` in current directory |
 
 Prints "Installed" on first run, "Updated" if the file already existed.
 
@@ -353,19 +353,19 @@ Prints "Installed" on first run, "Updated" if the file already existed.
 
 ## AI Agent Integration
 
-xml-cli can be used by AI coding agents like Claude Code. The `skill --install` command deploys a skill file that teaches the agent all available commands, flags, and pipe patterns.
+xmlq can be used by AI coding agents like Claude Code. The `skill --install` command deploys a skill file that teaches the agent all available commands, flags, and pipe patterns.
 
 **Setup:**
 
 ```bash
-# 1. Install xml-cli globally
-npm install -g xml-cli
+# 1. Install xmlq globally
+npm install -g xmlq
 
 # 2. In your project directory, install the skill
-xml-cli skill --install
+xmlq skill --install
 ```
 
-After this, Claude Code will automatically discover and use xml-cli when working with XML files in the project.
+After this, Claude Code will automatically discover and use xmlq when working with XML files in the project.
 
 ---
 
@@ -388,19 +388,19 @@ The CLI is designed for Unix pipelines:
 
 ```bash
 # Find expensive products, convert to JSON, process with jq
-xml-cli select '//product[price > 100]' data.xml | xml-cli json | jq '.[].name'
+xmlq select '//product[price > 100]' data.xml | xmlq json | jq '.[].name'
 
 # Count products per category
-xml-cli text '//product/@category-ref' data.xml | sort | uniq -c | sort -rn
+xmlq text '//product/@category-ref' data.xml | sort | uniq -c | sort -rn
 
 # Extract all SKUs to a file
-xml-cli text '//product/@sku' data.xml > skus.txt
+xmlq text '//product/@sku' data.xml > skus.txt
 
 # Pretty-print a fragment from a larger pipeline
-curl -s https://api.example.com/feed.xml | xml-cli first 3 '//item'
+curl -s https://api.example.com/feed.xml | xmlq first 3 '//item'
 
 # Validate all XML files in a directory
-find . -name '*.xml' -exec xml-cli validate {} \;
+find . -name '*.xml' -exec xmlq validate {} \;
 ```
 
 ---
@@ -410,7 +410,7 @@ find . -name '*.xml' -exec xml-cli validate {} \;
 - **Parser**: DOM-based (e.g. `fast-xml-parser`) for v1. Design command interfaces so a streaming/SAX backend can be swapped in later for large files.
 - **XPath**: Use `xpath` or `fontoxpath` for XPath 1.0/2.0 support. XPath is the standard XML query language — no need to invent a custom one.
 - **Output**: Colored + human-friendly when stdout is a TTY, plain text when piped. `--json` flag always produces machine-readable output.
-- **Packaging**: Publish to npm (`npx xml-cli`), optionally bundle with `pkg` or `bun build --compile` for a standalone binary.
+- **Packaging**: Publish to npm (`npx xmlq`), optionally bundle with `pkg` or `bun build --compile` for a standalone binary.
 
 ### Exploration workflow
 

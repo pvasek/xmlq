@@ -6,16 +6,16 @@ import { writeOutput, writeError } from "../utils/output.js";
 
 function getSkillTemplatePath(): string {
   const thisFile = fileURLToPath(import.meta.url);
-  // In compiled output: dist/commands/skill.js → project root → skills/xml-cli/SKILL.md
+  // In compiled output: dist/commands/skill.js → project root → skills/xmlq/SKILL.md
   const projectRoot = resolve(dirname(thisFile), "..", "..");
-  return join(projectRoot, "skills", "xml-cli", "SKILL.md");
+  return join(projectRoot, "skills", "xmlq", "SKILL.md");
 }
 
 export function installSkill(cwd: string): { action: "installed" | "updated" } {
   const templatePath = getSkillTemplatePath();
   const content = readFileSync(templatePath, "utf-8");
 
-  const targetDir = join(cwd, ".claude", "skills", "xml-cli");
+  const targetDir = join(cwd, ".claude", "skills", "xmlq");
   const targetFile = join(targetDir, "SKILL.md");
 
   const existed = existsSync(targetFile);
@@ -29,17 +29,17 @@ export function installSkill(cwd: string): { action: "installed" | "updated" } {
 export function register(program: Command): void {
   program
     .command("skill")
-    .description("Install xml-cli skill for Claude Code AI agent")
-    .option("--install", "Deploy SKILL.md to .claude/skills/xml-cli/ in current directory")
+    .description("Install xmlq skill for Claude Code AI agent")
+    .option("--install", "Deploy SKILL.md to .claude/skills/xmlq/ in current directory")
     .action((options: { install?: boolean }) => {
       if (!options.install) {
-        writeError("Usage: xml-cli skill --install");
+        writeError("Usage: xmlq skill --install");
         process.exit(1);
       }
 
       try {
         const { action } = installSkill(process.cwd());
-        const targetPath = join(process.cwd(), ".claude", "skills", "xml-cli", "SKILL.md");
+        const targetPath = join(process.cwd(), ".claude", "skills", "xmlq", "SKILL.md");
         if (action === "installed") {
           writeOutput(`Installed ${targetPath}`, false);
         } else {

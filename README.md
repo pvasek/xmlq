@@ -1,17 +1,22 @@
-# xml-cli
+# xmlq
+
+[![npm version](https://img.shields.io/npm/v/xmlq.svg)](https://www.npmjs.com/package/xmlq)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE.md)
 
 A pipe-friendly CLI for exploring and querying XML files. Built with Node.js/TypeScript.
+
+Published on npm as [`xmlq`](https://www.npmjs.com/package/xmlq).
 
 ## Installation
 
 ```bash
-npm install -g xml-cli
+npm install -g xmlq
 ```
 
 Or run directly with npx:
 
 ```bash
-npx xml-cli <command> [options] [file]
+npx xmlq <command> [options] [file]
 ```
 
 ## Usage
@@ -49,52 +54,52 @@ All commands accept a file path or read from **stdin** when no file is given. Ou
 
 ```bash
 # Get a quick overview of an XML file
-xml-cli stat data.xml
+xmlq stat data.xml
 
 # See the structure
-xml-cli tree data.xml
+xmlq tree data.xml
 
 # Find all unique element names
-xml-cli tags data.xml
+xmlq tags data.xml
 
 # Query with XPath
-xml-cli select '//product[price > 100]' data.xml
+xmlq select '//product[price > 100]' data.xml
 
 # Peek at the first record
-xml-cli first '//product' data.xml
+xmlq first '//product' data.xml
 
 # Count matches
-xml-cli count '//product' data.xml
+xmlq count '//product' data.xml
 
 # Extract text values
-xml-cli text '//product/name' data.xml
+xmlq text '//product/name' data.xml
 
 # Convert to JSON and pipe to jq
-xml-cli json data.xml | jq '.catalog.product[0]'
+xmlq json data.xml | jq '.catalog.product[0]'
 
 # Pretty-print
-xml-cli fmt --indent 4 data.xml
+xmlq fmt --indent 4 data.xml
 
 # Validate
-xml-cli validate data.xml
+xmlq validate data.xml
 
 # Pipe from stdin
-curl -s https://example.com/feed.xml | xml-cli first 3 '//item'
+curl -s https://example.com/feed.xml | xmlq first 3 '//item'
 ```
 
 ## AI Agent Integration (Claude Code)
 
-xml-cli works with [Claude Code](https://claude.ai/code) — install the skill so Claude learns to use it automatically:
+xmlq works with [Claude Code](https://claude.ai/code) — install the skill so Claude learns to use it automatically:
 
 ```bash
-# 1. Install xml-cli globally
-npm install -g xml-cli
+# 1. Install xmlq globally
+npm install -g xmlq
 
 # 2. In your project, install the skill
-xml-cli skill --install
+xmlq skill --install
 ```
 
-This creates `.claude/skills/xml-cli/SKILL.md` in your project. Claude Code discovers it and can then use xml-cli to explore XML files on your behalf.
+This creates `.claude/skills/xmlq/SKILL.md` in your project. Claude Code discovers it and can then use xmlq to explore XML files on your behalf.
 
 See [SPEC.md](./SPEC.md) for the full specification.
 
@@ -108,8 +113,8 @@ See [SPEC.md](./SPEC.md) for the full specification.
 ### Setup
 
 ```bash
-git clone https://github.com/pvasek/xml-cli.git
-cd xml-cli
+git clone https://github.com/pvasek/xmlq.git
+cd xmlq
 npm install
 ```
 
@@ -127,7 +132,7 @@ node dist/index.js stat data.xml
 
 # Or link globally for development
 npm link
-xml-cli stat data.xml
+xmlq stat data.xml
 ```
 
 ### Project structure
