@@ -1,0 +1,13 @@
+{
+  "name": "xmlq",
+  "owner": {
+    "name": "Pavel Vasek"
+  },
+  "plugins": [
+    {
+      "name": "xmlq",
+      "source": "./",
+      "description": "Pipe-friendly CLI skill for exploring and querying XML files — stat, tree, select, text, json, and more via XPath"
+    }
+  ]
+}
