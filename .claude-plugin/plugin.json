@@ -1,0 +1,5 @@
+{
+  "name": "xmlq",
+  "description": "Pipe-friendly CLI skill for exploring and querying XML files — stat, tree, select, text, json, and more via XPath",
+  "version": "0.0.4"
+}
