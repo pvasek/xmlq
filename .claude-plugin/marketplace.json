@@ -7,7 +7,11 @@
     {
       "name": "xmlq",
       "source": "./",
-      "description": "Pipe-friendly CLI skill for exploring and querying XML files — stat, tree, select, text, json, and more via XPath"
+      "description": "Pipe-friendly CLI skill for exploring and querying XML files — stat, tree, select, text, json, and more via XPath",
+      "author": {
+        "name": "Pavel Vasek"
+      },
+      "repository": "https://github.com/pvasek/xmlq"
     }
   ]
 }
