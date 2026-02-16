@@ -4,6 +4,26 @@ import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeOutput, writeError } from "../utils/output.js";
 
+interface AgentTarget {
+  name: string;
+  targetPath: (cwd: string) => string;
+}
+
+export const AGENT_TARGETS: Record<string, AgentTarget> = {
+  claude: {
+    name: "Claude Code",
+    targetPath: (cwd) => join(cwd, ".claude", "skills", "xmlq", "SKILL.md"),
+  },
+  codex: {
+    name: "Codex",
+    targetPath: (cwd) => join(cwd, "codex.md"),
+  },
+  opencode: {
+    name: "OpenCode",
+    targetPath: (cwd) => join(cwd, ".opencode", "skills", "xmlq", "SKILL.md"),
+  },
+};
+
 function getSkillTemplatePath(): string {
   const thisFile = fileURLToPath(import.meta.url);
   // In compiled output: dist/commands/skill.js → project root → skills/xmlq/SKILL.md
@@ -11,43 +31,83 @@ function getSkillTemplatePath(): string {
   return join(projectRoot, "skills", "xmlq", "SKILL.md");
 }
 
-export function installSkill(cwd: string): { action: "installed" | "updated" } {
+export function installSkill(
+  cwd: string,
+  target: string,
+  dest?: string,
+): { action: "installed" | "updated"; targetFile: string } {
   const templatePath = getSkillTemplatePath();
   const content = readFileSync(templatePath, "utf-8");
 
-  const targetDir = join(cwd, ".claude", "skills", "xmlq");
-  const targetFile = join(targetDir, "SKILL.md");
+  let targetFile: string;
+  if (target === "dest") {
+    if (!dest) throw new Error("--dest requires a path argument");
+    targetFile = join(cwd, dest, "SKILL.md");
+  } else {
+    const agent = AGENT_TARGETS[target];
+    if (!agent) throw new Error(`Unknown agent target: ${target}`);
+    targetFile = agent.targetPath(cwd);
+  }
 
   const existed = existsSync(targetFile);
 
-  mkdirSync(targetDir, { recursive: true });
+  mkdirSync(dirname(targetFile), { recursive: true });
   writeFileSync(targetFile, content, "utf-8");
 
-  return { action: existed ? "updated" : "installed" };
+  return { action: existed ? "updated" : "installed", targetFile };
 }
+
+const USAGE = `Usage: xmlq skill <option>
+
+Options:
+  --claude          Install to .claude/skills/xmlq/SKILL.md (Claude Code)
+  --codex           Install to codex.md (Codex)
+  --opencode        Install to .opencode/skills/xmlq/SKILL.md (OpenCode)
+  --dest <path>     Install to <path>/SKILL.md (custom destination)
+  --install         Alias for --claude`;
 
 export function register(program: Command): void {
   program
     .command("skill")
-    .description("Install xmlq skill for Claude Code AI agent")
-    .option("--install", "Deploy SKILL.md to .claude/skills/xmlq/ in current directory")
-    .action((options: { install?: boolean }) => {
-      if (!options.install) {
-        writeError("Usage: xmlq skill --install");
-        process.exit(1);
-      }
+    .description("Install xmlq skill for AI coding agents")
+    .option("--install", "Alias for --claude")
+    .option("--claude", "Deploy to .claude/skills/xmlq/ (Claude Code)")
+    .option("--codex", "Deploy to codex.md (Codex)")
+    .option("--opencode", "Deploy to .opencode/skills/xmlq/ (OpenCode)")
+    .option("--dest <path>", "Deploy to custom destination directory")
+    .action(
+      (options: {
+        install?: boolean;
+        claude?: boolean;
+        codex?: boolean;
+        opencode?: boolean;
+        dest?: string;
+      }) => {
+        const targets: string[] = [];
+        if (options.install || options.claude) targets.push("claude");
+        if (options.codex) targets.push("codex");
+        if (options.opencode) targets.push("opencode");
+        if (options.dest) targets.push("dest");
 
-      try {
-        const { action } = installSkill(process.cwd());
-        const targetPath = join(process.cwd(), ".claude", "skills", "xmlq", "SKILL.md");
-        if (action === "installed") {
-          writeOutput(`Installed ${targetPath}`, false);
-        } else {
-          writeOutput(`Updated ${targetPath}`, false);
+        if (targets.length === 0) {
+          writeError(USAGE);
+          process.exit(1);
         }
-      } catch (err) {
-        writeError(err instanceof Error ? err.message : String(err));
-        process.exit(1);
-      }
-    });
+
+        try {
+          for (const target of targets) {
+            const { action, targetFile } = installSkill(
+              process.cwd(),
+              target,
+              target === "dest" ? options.dest : undefined,
+            );
+            const verb = action === "installed" ? "Installed" : "Updated";
+            writeOutput(`${verb} ${targetFile}`, false);
+          }
+        } catch (err) {
+          writeError(err instanceof Error ? err.message : String(err));
+          process.exit(1);
+        }
+      },
+    );
 }
