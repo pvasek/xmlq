@@ -104,6 +104,14 @@ function buildSchema(nodes: XmlNode[]): Map<string, ElementSchema> {
       }
     }
 
+    // For children that don't appear in every instance, pad with 0 occurrences
+    for (const child of schema.children.values()) {
+      const expectedParents = instances.length;
+      while (child.occurrenceCounts.length < expectedParents) {
+        child.occurrenceCounts.push(0);
+      }
+    }
+
     schemas.set(name, schema);
   }
 
@@ -187,13 +195,6 @@ function formatAttrAnnotation(attr: AttrSchema, elementCount: number): string {
   return attr.name;
 }
 
-function formatCountRange(counts: number[]): string {
-  const min = Math.min(...counts);
-  const max = Math.max(...counts);
-  if (min === max) return String(min);
-  return `${min}..${max}`;
-}
-
 interface SchemaJson {
   [key: string]: unknown;
 }
@@ -226,77 +227,115 @@ function schemaToJson(schema: ElementSchema): SchemaJson {
   return result;
 }
 
-function formatSchema(
-  schema: ElementSchema,
-  indent: string,
-  isNested: boolean,
-): string {
+function xsdType(type: string): string {
+  const map: Record<string, string> = {
+    string: "xs:string",
+    integer: "xs:integer",
+    decimal: "xs:decimal",
+    date: "xs:dateTime",
+    boolean: "xs:boolean",
+  };
+  return map[type] || "xs:string";
+}
+
+function formatXsdAttrs(schema: ElementSchema, indent: string): string[] {
   const lines: string[] = [];
-  const prefix = isNested ? indent : "";
-
-  // Element header
-  lines.push(`${prefix}${schema.name}:`);
-  const innerIndent = indent + "  ";
-
-  // Count (only for repeated elements)
-  if (schema.count > 1) {
-    const range = formatCountRange(schema.occurrenceCounts);
-    lines.push(`${innerIndent}count: ${range}`);
-  }
-
-  // Attributes
-  if (schema.attrs.size > 0) {
-    const attrStrs = Array.from(schema.attrs.values()).map((a) =>
-      formatAttrAnnotation(a, schema.count),
-    );
-    lines.push(`${innerIndent}attrs: [${attrStrs.join(", ")}]`);
-  }
-
-  // Children
-  if (schema.childOrder.length > 0) {
-    lines.push(`${innerIndent}children: [${schema.childOrder.join(", ")}]`);
-
-    for (const childName of schema.childOrder) {
-      const child = schema.children.get(childName)!;
-
-      // Simple leaf elements: inline
-      if (child.children.size === 0 && child.attrs.size === 0 && child.hasText) {
-        const type = inferType(child.textValues);
-        if (child.count > 1) {
-          const range = formatCountRange(child.occurrenceCounts);
-          lines.push(`${innerIndent}${child.name}: { count: ${range}, text: ${type} }`);
-        } else {
-          lines.push(`${innerIndent}${child.name}: { text: ${type} }`);
-        }
-      } else if (child.children.size === 0 && child.attrs.size > 0) {
-        // Leaf with attrs
-        const attrStrs = Array.from(child.attrs.values()).map((a) =>
-          formatAttrAnnotation(a, child.count),
-        );
-        const parts: string[] = [];
-        if (child.count > 1) {
-          const range = formatCountRange(child.occurrenceCounts);
-          parts.push(`count: ${range}`);
-        }
-        parts.push(`attrs: [${attrStrs.join(", ")}]`);
-        if (child.hasText) {
-          parts.push(`text: ${inferType(child.textValues)}`);
-        }
-        lines.push(`${innerIndent}${child.name}: { ${parts.join(", ")} }`);
-      } else if (child.children.size > 0) {
-        // Nested: recurse
-        lines.push("");
-        lines.push(...formatSchema(child, innerIndent, true).split("\n"));
+  for (const attr of schema.attrs.values()) {
+    const use = attr.count >= schema.count ? "required" : "optional";
+    const values = Array.from(attr.values).sort();
+    if (values.length > 1 && values.length <= 10) {
+      // Enum attribute
+      lines.push(`${indent}<xs:attribute name="${attr.name}" use="${use}">`);
+      lines.push(`${indent}  <xs:simpleType>`);
+      lines.push(`${indent}    <xs:restriction base="xs:string">`);
+      for (const v of values) {
+        lines.push(`${indent}      <xs:enumeration value="${v}"/>`);
       }
+      lines.push(`${indent}    </xs:restriction>`);
+      lines.push(`${indent}  </xs:simpleType>`);
+      lines.push(`${indent}</xs:attribute>`);
+    } else {
+      const type = values.length > 0 ? xsdType(inferType(values)) : "xs:string";
+      lines.push(`${indent}<xs:attribute name="${attr.name}" type="${type}" use="${use}"/>`);
     }
   }
+  return lines;
+}
 
-  // Text content (only for elements that also have children — mixed content)
-  if (schema.hasText && schema.childOrder.length === 0 && schema.attrs.size === 0 && !isNested) {
-    const type = inferType(schema.textValues);
-    lines.push(`${innerIndent}text: ${type}`);
+function formatXsdElement(schema: ElementSchema, indent: string): string[] {
+  const lines: string[] = [];
+
+  // Occurrence attributes
+  const occParts: string[] = [];
+  const minOcc = Math.min(...schema.occurrenceCounts);
+  const maxOcc = Math.max(...schema.occurrenceCounts);
+  if (minOcc === 0) {
+    occParts.push('minOccurs="0"');
+  }
+  if (maxOcc > 1) {
+    occParts.push('maxOccurs="unbounded"');
+  }
+  const occStr = occParts.length > 0 ? " " + occParts.join(" ") : "";
+
+  const hasAttrs = schema.attrs.size > 0;
+  const hasChildren = schema.childOrder.length > 0;
+  const hasText = schema.hasText;
+
+  // Simple text-only element with no attributes
+  if (!hasChildren && !hasAttrs && hasText) {
+    const type = xsdType(inferType(schema.textValues));
+    lines.push(`${indent}<xs:element name="${schema.name}" type="${type}"${occStr}/>`);
+    return lines;
   }
 
+  // Empty element with no attributes
+  if (!hasChildren && !hasAttrs && !hasText) {
+    lines.push(`${indent}<xs:element name="${schema.name}"${occStr}/>`);
+    return lines;
+  }
+
+  lines.push(`${indent}<xs:element name="${schema.name}"${occStr}>`);
+  const inner = indent + "  ";
+
+  if (hasChildren) {
+    // Complex type with children
+    const mixedAttr = hasText ? ' mixed="true"' : "";
+    lines.push(`${inner}<xs:complexType${mixedAttr}>`);
+    lines.push(`${inner}  <xs:sequence>`);
+    for (const childName of schema.childOrder) {
+      const child = schema.children.get(childName)!;
+      lines.push(...formatXsdElement(child, inner + "    "));
+    }
+    lines.push(`${inner}  </xs:sequence>`);
+    lines.push(...formatXsdAttrs(schema, inner + "  "));
+    lines.push(`${inner}</xs:complexType>`);
+  } else if (hasAttrs && hasText) {
+    // Text + attributes → simpleContent extension
+    const type = xsdType(inferType(schema.textValues));
+    lines.push(`${inner}<xs:complexType>`);
+    lines.push(`${inner}  <xs:simpleContent>`);
+    lines.push(`${inner}    <xs:extension base="${type}">`);
+    lines.push(...formatXsdAttrs(schema, inner + "      "));
+    lines.push(`${inner}    </xs:extension>`);
+    lines.push(`${inner}  </xs:simpleContent>`);
+    lines.push(`${inner}</xs:complexType>`);
+  } else if (hasAttrs && !hasText) {
+    // Attributes only, no text, no children
+    lines.push(`${inner}<xs:complexType>`);
+    lines.push(...formatXsdAttrs(schema, inner + "  "));
+    lines.push(`${inner}</xs:complexType>`);
+  }
+
+  lines.push(`${indent}</xs:element>`);
+  return lines;
+}
+
+function formatXsd(schema: ElementSchema): string {
+  const lines: string[] = [];
+  lines.push('<?xml version="1.0" encoding="UTF-8"?>');
+  lines.push('<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">');
+  lines.push(...formatXsdElement(schema, "  "));
+  lines.push("</xs:schema>");
   return lines.join("\n");
 }
 
@@ -342,14 +381,14 @@ export async function runSchema(
     jsonResult[root.name] = schemaToJson(rootSchema);
     writeOutput(jsonResult, true);
   } else {
-    writeOutput(formatSchema(rootSchema, "", false), false);
+    writeOutput(formatXsd(rootSchema), false);
   }
 }
 
 export function register(program: Command): void {
   program
     .command("schema")
-    .description("Infer a rough schema from the document")
+    .description("Infer an XSD schema from the document")
     .argument("[file]", "XML file path (reads from stdin if omitted)")
     .option("--json", "Output inferred schema as JSON")
     .action(

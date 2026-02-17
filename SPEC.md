@@ -293,38 +293,64 @@ xsi       http://www.w3.org/2001/XMLSchema-instance
 
 ### `xmlq schema`
 
-Infer a rough schema from the document — shows which elements appear where, their attributes, whether they contain text or children, and optionally value types.
+Infer an XSD (XML Schema Definition) from the document — analyzes elements, attributes, text types, and occurrence patterns to produce a standard XSD that can be used by XML tools and validators.
 
 ```
 xmlq schema data.xml
 ```
 
-```yaml
-catalog:
-  attrs: [xmlns]
-  children: [metadata, category, product]
-
-  metadata:
-    children: [created, version]
-    created: { text: date }
-    version: { text: string }
-
-  category:
-    count: 45
-    attrs: [id(unique)]
-    children: [name, description]
-    name: { text: string }
-    description: { text: string }
-
-  product:
-    count: 1200
-    attrs: [sku(unique), category-ref]
-    children: [name, price, tags]
-    name: { text: string }
-    price: { attrs: [currency(enum:USD|EUR|GBP)], text: decimal }
-    tags:
-      children: [tag]
-      tag: { count: 1..5, text: string }
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="catalog">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="category" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="description" type="xs:string"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="product" maxOccurs="unbounded">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="name" type="xs:string"/>
+              <xs:element name="price">
+                <xs:complexType>
+                  <xs:simpleContent>
+                    <xs:extension base="xs:decimal">
+                      <xs:attribute name="currency" use="required">
+                        <xs:simpleType>
+                          <xs:restriction base="xs:string">
+                            <xs:enumeration value="EUR"/>
+                            <xs:enumeration value="GBP"/>
+                            <xs:enumeration value="USD"/>
+                          </xs:restriction>
+                        </xs:simpleType>
+                      </xs:attribute>
+                    </xs:extension>
+                  </xs:simpleContent>
+                </xs:complexType>
+              </xs:element>
+              <xs:element name="tags" minOccurs="0">
+                <xs:complexType>
+                  <xs:sequence>
+                    <xs:element name="tag" type="xs:string" maxOccurs="unbounded"/>
+                  </xs:sequence>
+                </xs:complexType>
+              </xs:element>
+            </xs:sequence>
+            <xs:attribute name="sku" type="xs:string" use="required"/>
+            <xs:attribute name="category-ref" type="xs:string" use="required"/>
+          </xs:complexType>
+        </xs:element>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
 ```
 
 | Flag | Description |
